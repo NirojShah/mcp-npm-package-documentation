@@ -17,12 +17,14 @@ server.registerTool(
     {
         title: "NPM Package Documentation",
         description: "Documentation for the npm package.",
-        version: "1.0.0",
         inputSchema: z.object({
-            packageName: z.string().describe("The name of the npm package to get documentation for.")
-        }),
+            packageName: z.string().describe(
+                "The name of the npm package to get documentation for."
+            ),
+        })
     },
-    async ({ packageName }) => {
+    async (args) => {
+        const packageName: string = args.packageName;
         try {
             const service = new ServiceImplementation();
             const packageDetail = await service.getRepoInfo(packageName);
@@ -39,7 +41,7 @@ server.registerTool(
 
             return {
                 content: [
-                    { type: "text", text: documentation.CONTENT}
+                    { type: "text", text: documentation.CONTENT }
                 ]
             }
         } catch (err) {

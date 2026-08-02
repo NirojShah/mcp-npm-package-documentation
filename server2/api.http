@@ -1,0 +1,133 @@
+### Initialize MCP Session
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "REST Client",
+      "version": "1.0.0"
+    }
+  }
+}
+
+###
+
+### List Tools
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list",
+  "params": {}
+}
+
+###
+
+### Call Tool - user-info
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "user-info",
+    "arguments": {
+      "userId": "1"
+    }
+  }
+}
+
+###
+
+### List Resources
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "resources/list",
+  "params": {}
+}
+
+###
+
+### Read Resource - Company Guidelines
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "resources/read",
+  "params": {
+    "uri": "company://guidelines"
+  }
+}
+
+###
+
+### List Prompts
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "prompts/list",
+  "params": {}
+}
+
+###
+
+### Get Prompt - User Summary
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "prompts/get",
+  "params": {
+    "name": "summary",
+    "arguments": {
+      "type": "user"
+    }
+  }
+}
+
+###
+
+### Get Prompt - Document Summary
+POST http://localhost:5000/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "prompts/get",
+  "params": {
+    "name": "summary",
+    "arguments": {
+      "type": "document"
+    }
+  }
+}

@@ -2,8 +2,9 @@ import express from "express";
 import { McpServer } from "@modelcontextprotocol/server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/server";
 import type { Express, Request, Response } from "express";
-import { readFile } from "node:fs/promises";
 import { z } from "zod";
+import ServiceImplementation from "./service/core.service.implementation.js";
+import STATUS_CODES from "./status-codes/status.code.js";
 
 const app: Express = express();
 
@@ -25,17 +26,36 @@ mcpServer.registerResource(
         mimeType: "text/plain",
     },
     async () => {
-        const content = await readFile("./company-guidelines.txt", "utf-8");
+        try {
 
-        return {
-            contents: [
-                {
-                    uri: "company://guidelines",
-                    mimeType: "text/plain",
-                    text: content,
-                },
-            ],
-        };
+            const service = new ServiceImplementation();
+            const response = await service.companyGudelines();
+
+            if (response.getStatusCode() !== STATUS_CODES.OK) {
+                throw new Error(response.getMessage());
+            }
+
+            return {
+                contents: [
+                    {
+                        uri: "company://guidelines",
+                        mimeType: "text/plain",
+                        text: response.getData() as string,
+                    },
+                ],
+            };
+        } catch (err) {
+            const error = err as Error
+            return {
+                contents: [
+                    {
+                        uri: "company://guidelines",
+                        mimeType: "text/plain",
+                        text: error.message as string
+                    }
+                ]
+            }
+        }
     }
 );
 
@@ -47,12 +67,25 @@ mcpServer.registerTool("user-info", {
         userId: z.string().describe("The ID of the user to retrieve information for."),
     })
 }, async (args) => {
+    const service = new ServiceImplementation();
     const userId: string = args.userId;
+
+    const resp = await service.userByid(Number(userId))
+    if (resp.getStatusCode() == STATUS_CODES.OK) {
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: "User details"
+                }
+            ]
+        }
+    }
     return {
         content: [
             {
                 type: "text",
-                text: "User details"
+                text: resp.getMessage() as string
             }
         ]
     }
@@ -67,24 +100,40 @@ mcpServer.registerPrompt("summary", {
         type: z.enum(["user", "document"]),
     })
 }, async (args) => {
+    try {
 
-    const queryFor: "user" | "document" = args.type;
-    const instruction =
-        queryFor === "user"
-            ? "You are a personal assistant. Please summarize the user information."
-            : "You are a personal assistant. Please summarize the company documentation.";
+        const service = new ServiceImplementation()
+        const queryFor: "user" | "document" = args.type;
+        const resp = await service.summaryPrompt(queryFor);
 
-    return {
-        messages: [
-            {
-                role: "assistant",
-                content: {
-                    type: "text",
-                    text: instruction
-                }
+        if (resp.getStatusCode() == STATUS_CODES.OK) {
+            return {
+                messages: [
+                    {
+                        role: "assistant",
+                        content: {
+                            type: "text",
+                            text: resp.getData() as string
+                        }
+                    }
+                ]
             }
-        ]
-    };
+        }
+        throw new Error(resp.getMessage())
+    } catch (err) {
+        const error = err as Error;
+        return {
+            messages: [
+                {
+                    role: "assistant",
+                    content: {
+                        type: "text",
+                        text: error.message as string
+                    }
+                }
+            ]
+        }
+    }
 })
 
 

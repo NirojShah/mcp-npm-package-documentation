@@ -76,7 +76,7 @@ mcpServer.registerTool("user-info", {
             content: [
                 {
                     type: "text",
-                    text: "User details"
+                    text: resp.getData() as string
                 }
             ]
         }
@@ -89,9 +89,33 @@ mcpServer.registerTool("user-info", {
             }
         ]
     }
-}
+})
 
-)
+
+mcpServer.registerTool("all-users", {
+    title: "All Users",
+    description: "An Tool to get all the users.",
+    inputSchema: z.object({
+        page: z.number().describe("Page is required."),
+        limit: z.number().describe("Limit is required.")
+    })
+}, async () => {
+    const service = new ServiceImplementation();
+    const response = await service.userInfo();
+    
+    if(response.getStatusCode() == STATUS_CODES.OK){
+        
+    }
+    return {
+        content: [
+            {
+                type: "text",
+                text: "This is the data."
+            }
+        ]
+    }
+})
+
 
 mcpServer.registerPrompt("summary", {
     title: "Summary Prompt",

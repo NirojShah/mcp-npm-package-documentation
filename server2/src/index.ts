@@ -99,12 +99,14 @@ mcpServer.registerTool("all-users", {
         page: z.number().describe("Page is required."),
         limit: z.number().describe("Limit is required.")
     })
-}, async () => {
+}, async (args) => {
+    const page: number = args.page;
+    const limit: number = args.limit;
     const service = new ServiceImplementation();
-    const response = await service.userInfo();
-    
-    if(response.getStatusCode() == STATUS_CODES.OK){
-        
+    const response = await service.userInfo(page, limit);
+
+    if (response.getStatusCode() == STATUS_CODES.OK) {
+
     }
     return {
         content: [

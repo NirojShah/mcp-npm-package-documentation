@@ -2,35 +2,44 @@ import type Service from "./core.service.js";
 import ResponseDto from "../response-dto/response.dto.js";
 import STATUS_CODES from "../status-codes/status.code.js";
 import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class ServiceImplementation implements Service {
+
     async companyGudelines(): Promise<ResponseDto> {
 
-        const guidelines = await readFile("../assets/company-guidelines.txt", "utf-8")
-        console.log(guidelines)
+        const filePath = path.join(__dirname, "../assets/company-guidelines.txt")
+        const guidelines = await readFile(filePath, "utf-8")
         if (guidelines.length > 0) {
             return new ResponseDto(STATUS_CODES.OK, "successfully fetched.", guidelines)
         }
         return new ResponseDto(STATUS_CODES.NOT_FOUND, "file not found.", null)
     }
 
-    async userInfo(): Promise<ResponseDto> {
-        const file = await readFile("../assets/user.json", "utf-8")
+    async userInfo(page: number, limit: number): Promise<ResponseDto> {
+        const filePath = path.join(__dirname, "../assets/user.json")
+        const file = await readFile(filePath, "utf-8")
         const userDetails = JSON.parse(file);
         if (userDetails.data.length > 0) {
             return new ResponseDto(STATUS_CODES.NOT_FOUND, "file not found.", null)
         }
-        return new ResponseDto(STATUS_CODES.NOT_FOUND, "file not found.", null)
+        return new ResponseDto(STATUS_CODES.NOT_FOUND, "All users.", JSON.stringify(userDetails))
     }
 
     async userByid(userId: number): Promise<ResponseDto> {
-        const file = await readFile("../assets/user.json", "utf-8");
+        const filePath = path.join(__dirname, "../assets/user.json")
+        const file = await readFile(filePath, "utf-8");
         const userList = JSON.parse(file);
-        if (userList.data.length > 0) {
-            const user = userList.data.find((usr: any) => usr.id === userId);
+        if (userList.length > 0) {
+            const user = userList.find((usr: any) => usr.id === userId);
             if (user) {
-                return new ResponseDto(STATUS_CODES.OK, "successfully fetched", user)
+                return new ResponseDto(STATUS_CODES.OK, "successfully fetched", JSON.stringify(user))
             }
+            return new ResponseDto(STATUS_CODES.NOT_FOUND, "User Not found.", null)
         }
         return new ResponseDto(STATUS_CODES.NOT_FOUND, "file not found.", null)
 

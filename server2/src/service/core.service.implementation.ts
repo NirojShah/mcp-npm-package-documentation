@@ -21,13 +21,34 @@ class ServiceImplementation implements Service {
     }
 
     async userInfo(page: number, limit: number): Promise<ResponseDto> {
-        const filePath = path.join(__dirname, "../assets/user.json")
-        const file = await readFile(filePath, "utf-8")
+        const filePath = path.join(__dirname, "../assets/user.json");
+        const file = await readFile(filePath, "utf-8");
         const userDetails = JSON.parse(file);
-        if (userDetails.data.length > 0) {
-            return new ResponseDto(STATUS_CODES.NOT_FOUND, "file not found.", null)
+
+        if (!userDetails?.data || userDetails.data.length === 0) {
+            return new ResponseDto(
+                STATUS_CODES.NOT_FOUND,
+                "No users found.",
+                null
+            );
         }
-        return new ResponseDto(STATUS_CODES.NOT_FOUND, "All users.", JSON.stringify(userDetails))
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        const paginatedUsers = userDetails.data.slice(startIndex, endIndex);
+
+        return new ResponseDto(
+            STATUS_CODES.OK,
+            "All users.",
+            {
+                page,
+                limit,
+                totalRecords: userDetails.data.length,
+                totalPages: Math.ceil(userDetails.data.length / limit),
+                data: paginatedUsers
+            }
+        );
     }
 
     async userByid(userId: number): Promise<ResponseDto> {
